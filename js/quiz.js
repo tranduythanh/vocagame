@@ -3,9 +3,18 @@ let currentQuestionIndex = 0;
 const questionElement = document.querySelector('.question');
 const optionsElement = document.querySelector('.options');
 const scoreElement = document.querySelector('.score');
-const words = Object.keys(vocabulary);
+let words = Object.keys(vocabulary);
 const correctSound = document.getElementById('correctSound');
 const wrongSound = document.getElementById('wrongSound');
+
+shuffleWords(words);
+
+function shuffleWords(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
 
 function shuffleOptions(correctAnswer) {
     let options = [correctAnswer];
