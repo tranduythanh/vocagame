@@ -44,9 +44,13 @@ function displayQuestion() {
         return;
     }
     
-    const word = words[currentQuestionIndex];
+    let word = words[currentQuestionIndex];
     const correctAnswer = vocabulary[word];
-    questionElement.textContent = word;
+
+    // Bold and colorize terms in quotes
+    word = word.replace(/"([^"]*)"/g, '<span style="font-weight:bold; color:red;">$1</span>');
+
+    questionElement.innerHTML = word; // Use innerHTML instead of textContent
     const options = shuffleOptions(correctAnswer);
 
     optionsElement.innerHTML = '';
