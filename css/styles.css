@@ -37,3 +37,6 @@ body {
 .options li.wrong {
     border-color: red;
 }
+.score {
+    font-size: 24px;
+}

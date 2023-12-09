@@ -1,20 +1,20 @@
 let score = 0;
-let currentQuestionIndex = 0;
 const questionElement = document.querySelector('.question');
 const optionsElement = document.querySelector('.options');
 const scoreElement = document.querySelector('.score');
-let words = Object.keys(vocabulary);
+let wordsQueue = shuffleWords(Object.keys(vocabulary));
 const correctSound = document.getElementById('correctSound');
 const wrongSound = document.getElementById('wrongSound');
 
-shuffleWords(words);
-
 function shuffleWords(array) {
-    for (let i = array.length - 1; i > 0; i--) {
+    let newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
+    return newArray;
 }
+
 
 function shuffleOptions(correctAnswer) {
     let options = [correctAnswer];
@@ -37,35 +37,33 @@ function shuffleOptions(correctAnswer) {
 }
 
 function displayQuestion() {
-    if (currentQuestionIndex >= words.length) {
+    if (wordsQueue.length === 0) {
         questionElement.textContent = 'Quiz Completed!';
         optionsElement.innerHTML = '';
         scoreElement.textContent = 'Final Score: ' + score;
         return;
     }
     
-    let word = words[currentQuestionIndex];
+    let word = wordsQueue.shift(); // Pop the first word from the queue
     const correctAnswer = vocabulary[word];
 
-    // Bold and colorize terms in quotes
-    word = word.replace(/"([^"]*)"/g, '<span style="font-weight:bold; color:red;">$1</span>');
+    styleText = word.replace(/"([^"]*)"/g, '<span style="font-weight:bold; color:red;">$1</span>');
 
-    questionElement.innerHTML = word; // Use innerHTML instead of textContent
+    questionElement.innerHTML = styleText;
     const options = shuffleOptions(correctAnswer);
 
     optionsElement.innerHTML = '';
     options.forEach(option => {
         const li = document.createElement('li');
         li.textContent = option;
-        li.onclick = function () { checkAnswer(option, li); }; // Pass the li element as well
+        li.onclick = function () { checkAnswer(option, li, word); };
         optionsElement.appendChild(li);
     });
 }
 
-function checkAnswer(selectedAnswer, element) {
-    const word = words[currentQuestionIndex];
+function checkAnswer(selectedAnswer, element, word) {
     const correctAnswer = vocabulary[word];
-
+    
     if (selectedAnswer === correctAnswer) {
         element.classList.add('correct');
         correctSound.play();
@@ -73,27 +71,25 @@ function checkAnswer(selectedAnswer, element) {
     } else {
         element.classList.add('wrong');
         wrongSound.play();
+        wordsQueue.push(word); // Re-enqueue the word for retry
     }
 
-    // Disable all options after one is selected
     let allOptions = optionsElement.children;
     for (let i = 0; i < allOptions.length; i++) {
         allOptions[i].style.pointerEvents = 'none';
         if (allOptions[i].textContent === correctAnswer) {
-        allOptions[i].classList.add('correct');
+            allOptions[i].classList.add('correct');
         }
     }
 
-    // Move to the next question after a delay
     setTimeout(function() {
-        currentQuestionIndex++;
         displayQuestion();
         updateScore();
     }, 500);
 }
 
 function updateScore() {
-    scoreElement.textContent = 'Score: ' + score;
+    scoreElement.textContent = `Score: ${score}/${wordsQueue.length}`;
 }
 
 // Initialize the quiz
